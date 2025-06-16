@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from '@/utils/supabase/server'
+import { supabaseAdmin } from '@/utils/supabase/admin' // cliente sin cookies
 
-const supabase = createClient()
-
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-06-20',
+})
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -16,15 +14,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  // 🔍 Obtener información del evento
-  const { data: event, error } = await supabase
+  // 🔍 Obtener precio y título del evento desde Supabase
+  const { data: event, error } = await supabaseAdmin
     .from('events')
     .select('title, price')
     .eq('id', eventId)
     .single()
 
   if (error || !event) {
-    console.error('Error fetching event:', error)
+    console.error('❌ Error fetching event:', error)
     return NextResponse.json({ error: 'Event not found' }, { status: 404 })
   }
 
@@ -40,7 +38,7 @@ export async function POST(req: NextRequest) {
           product_data: {
             name: event.title,
           },
-          unit_amount: Math.round(totalPrice * 100), // Stripe usa centavos
+          unit_amount: Math.round(totalPrice * 100), // en centavos
         },
         quantity: 1,
       },
