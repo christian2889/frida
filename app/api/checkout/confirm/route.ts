@@ -29,13 +29,13 @@ export async function POST(req: NextRequest) {
     ])
 
     if (error) {
-      console.error('❌ Error saving reservation:', error)
+      console.error('❌ Supabase insert error:', error)
       return NextResponse.json({ error: 'Failed to save reservation' }, { status: 500 })
     }
 
-    return NextResponse.json({ message: 'Reservation confirmed' })
+    return NextResponse.json({ message: 'Reservation saved' })
   } catch (error) {
-    console.error('❌ Stripe session error:', error)
-    return NextResponse.json({ error: 'Failed to confirm session' }, { status: 500 })
+    console.error('❌ Stripe session retrieve error:', error)
+    return NextResponse.json({ error: 'Failed to retrieve session' }, { status: 500 })
   }
 }
