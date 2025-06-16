@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/utils/supabase/client'
 
 interface ReservationFormProps {
   eventId: string
@@ -26,26 +25,31 @@ export default function ReservationForm({ eventId }: ReservationFormProps) {
     e.preventDefault()
     setLoading(true)
 
-    const { error } = await supabase.from('reservations').insert([
-      {
-        ...form,
-        event_id: eventId,
-        quantity: parseInt(form.quantity.toString()),
-      },
-    ])
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId,
+          name: form.name,
+          email: form.email,
+          quantity: form.quantity,
+        }),
+      })
 
-    setLoading(false)
+      const data = await res.json()
 
-    if (error) {
-      alert('Error creating reservation')
-      console.error(error)
-    } else {
-      setSuccess(true)
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('No checkout URL returned')
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error)
+      alert('There was a problem with your reservation. Please try again.')
+    } finally {
+      setLoading(false)
     }
-  }
-
-  if (success) {
-    return <p className="text-green-500 text-center">Reservation confirmed!</p>
   }
 
   return (
@@ -55,7 +59,7 @@ export default function ReservationForm({ eventId }: ReservationFormProps) {
         placeholder="Full name"
         value={form.name}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded"
+        className="w-full px-4 py-2 border rounded text-black"
         required
       />
       <input
@@ -64,7 +68,7 @@ export default function ReservationForm({ eventId }: ReservationFormProps) {
         placeholder="Email"
         value={form.email}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded"
+        className="w-full px-4 py-2 border rounded text-black"
         required
       />
       <input
@@ -72,7 +76,7 @@ export default function ReservationForm({ eventId }: ReservationFormProps) {
         placeholder="Phone"
         value={form.phone}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded"
+        className="w-full px-4 py-2 border rounded text-black"
         required
       />
       <input
@@ -82,7 +86,7 @@ export default function ReservationForm({ eventId }: ReservationFormProps) {
         placeholder="Quantity"
         value={form.quantity}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded"
+        className="w-full px-4 py-2 border rounded text-black"
         required
       />
       <textarea
@@ -90,7 +94,7 @@ export default function ReservationForm({ eventId }: ReservationFormProps) {
         placeholder="Notes (optional)"
         value={form.notes}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded"
+        className="w-full px-4 py-2 border rounded text-black"
       />
       <button
         type="submit"

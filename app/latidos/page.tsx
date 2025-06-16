@@ -6,14 +6,14 @@ export default async function LatidosPage() {
 
   const { data: events, error } = await supabase
     .from('events')
-    .select('*')
-    .eq('published', true)
+    .select('id, title, date, price, image, description')
     .eq('category', 'latidos')
+    .eq('published', true)
     .order('date', { ascending: true })
 
   if (error) {
     console.error('Error fetching events:', error.message)
-    return <p className="text-red-500 text-center">Failed to load events.</p>
+    return <p className="text-red-500">Error loading events.</p>
   }
 
   if (!events || events.length === 0) {
@@ -21,7 +21,7 @@ export default async function LatidosPage() {
   }
 
   return (
-    <section className="p-6 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <section className="min-h-screen bg-black text-white p-10 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {events.map((event) => (
         <EventCard
           key={event.id}
@@ -30,6 +30,7 @@ export default async function LatidosPage() {
           date={event.date}
           price={event.price}
           image={event.image}
+          description={event.description}
         />
       ))}
     </section>
