@@ -1,16 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { supabase } from '@/utils/supabase/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20', // Asegúrate que sea compatible con tu Stripe SDK
+  apiVersion: '2024-06-20', // ✅ asegúrate que sea esta versión
 })
-
-// ✅ Inicializar Supabase con claves del entorno
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_KEY! // usa la nueva variable que configuraste
-)
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
