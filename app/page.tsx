@@ -1,7 +1,7 @@
 'use client'
 
+import EventCard from '@/components/EventCard'
 import Navbar from '@/components/Navbar'
-import Link from 'next/link'
 
 export default function HomePage() {
   return (
@@ -20,29 +20,41 @@ export default function HomePage() {
           <source src="/videos/latidos.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
+      </section>
 
-        <div className="flex flex-col items-center justify-center h-full px-6 text-center text-white bg-black/50">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Welcome to <span className="text-pink-500">Casa Frida</span>
-          </h1>
-          <p className="text-lg md:text-xl max-w-xl">
-            Two worlds. One experience. Rooftop Lounge & Fine Dining in Baja California.
-          </p>
-          <div className="flex flex-col md:flex-row gap-4 mt-6">
-            <Link
-              href="/latidos"
-              className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-full"
-            >
-              Enter Latidos
-            </Link>
-            <Link
-              href="/corazon"
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full"
-            >
-              Explore Corazón D' Petra
-            </Link>
-          </div>
+      {/* Events section */}
+      <section id="events" className="bg-black text-white p-10">
+        <h2 className="text-3xl font-bold text-center mb-8">Upcoming Events</h2>
+        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <EventCard
+            id="1"
+            title="DJ Sunset Session"
+            date="June 29, 2025 – 6:00 PM"
+            price="$20 USD"
+            image="https://source.unsplash.com/400x300/?dj,party"
+          />
+          <EventCard
+            id="2"
+            title="Frida Nights: Wine & Beats"
+            date="July 6, 2025 – 8:00 PM"
+            price="$35 USD"
+            image="https://source.unsplash.com/400x300/?nightclub,lights"
+          />
+          <EventCard
+            id="3"
+            title="Electronic Garden"
+            date="July 13, 2025 – 5:00 PM"
+            price="$25 USD"
+            image="https://source.unsplash.com/400x300/?festival,dance"
+          />
         </div>
+      </section>
+
+      {/* Contact section */}
+      <section id="contact" className="bg-white text-black p-10 text-center">
+        <h2 className="text-3xl font-bold mb-4">Contact Us</h2>
+        <p className="mb-2">Email: info@casafridaevents.com</p>
+        <p>Instagram: @CasaFridaEvents</p>
       </section>
     </>
   )
