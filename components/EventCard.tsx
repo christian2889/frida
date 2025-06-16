@@ -1,12 +1,10 @@
-'use client'
-
 import Link from 'next/link'
 
 type EventProps = {
-  id: string // ← ID del evento
+  id: string
   title: string
   date: string
-  price: string
+  price: string | number
   image: string
 }
 
@@ -17,11 +15,13 @@ export default function EventCard({ id, title, date, price, image }: EventProps)
       <div className="p-4">
         <h3 className="text-xl font-bold text-white">{title}</h3>
         <p className="text-sm text-zinc-400">{date}</p>
-        <p className="text-lg font-semibold text-pink-400 mt-2">{price}</p>
-        <Link href={`/reserve/${id}`}>
-          <button className="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-full">
-            Book Now
-          </button>
+        <p className="text-lg font-semibold text-pink-400 mt-2">${price} USD</p>
+        <Link
+          href={`/reserve/${id}`}
+          className="mt-4 block w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-full text-center"
+          aria-label={`Book now for ${title}`}
+        >
+          Book Now
         </Link>
       </div>
     </div>

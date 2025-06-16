@@ -1,22 +1,37 @@
-'use client'
+import { createClient } from '@/utils/supabase/server'
+import EventCard from '@/components/EventCard'
 
-import Navbar from '@/components/Navbar'
+export default async function LatidosPage() {
+  const supabase = createClient()
 
-export default function LatidosPage() {
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('published', true)
+    .eq('category', 'latidos')
+    .order('date', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching events:', error.message)
+    return <p className="text-red-500 text-center">Failed to load events.</p>
+  }
+
+  if (!events || events.length === 0) {
+    return <p className="text-white text-center mt-10">No events found for Latidos.</p>
+  }
+
   return (
-    <>
-      <Navbar />
-      <section className="min-h-screen bg-black text-white p-10">
-        <h1 className="text-4xl font-bold mb-6">Latidos Rooftop Lounge</h1>
-        <p className="mb-6 max-w-2xl">
-          Discover electrifying nights at Latidos – rooftop DJ sessions, dance, and immersive experiences under the stars.
-        </p>
-
-        {/* Aquí irán los eventos específicos de Latidos */}
-        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {/* <EventCard ... /> */}
-        </div>
-      </section>
-    </>
+    <section className="p-6 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {events.map((event) => (
+        <EventCard
+          key={event.id}
+          id={event.id}
+          title={event.title}
+          date={event.date}
+          price={event.price}
+          image={event.image}
+        />
+      ))}
+    </section>
   )
 }
