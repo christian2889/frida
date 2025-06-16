@@ -1,34 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
 import { supabaseAdmin } from '@/utils/supabase/admin'
 
-// POST: guarda reserva después de pago exitoso
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-06-20',
+})
+
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { name, email, quantity, eventId, sessionId } = body
+  const { sessionId } = body
 
-  if (!name || !email || !quantity || !eventId || !sessionId) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  if (!sessionId) {
+    return NextResponse.json({ error: 'Missing session ID' }, { status: 400 })
   }
 
   try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+    const { name, email, eventId, quantity } = session.metadata || {}
+
     const { error } = await supabaseAdmin.from('reservations').insert([
       {
         name,
         email,
-        quantity,
         event_id: eventId,
-        stripe_session_id: sessionId,
+        quantity: parseInt(quantity || '1'),
       },
     ])
 
     if (error) {
-      console.error('❌ Supabase insert error:', error)
-      return NextResponse.json({ error: 'Error saving reservation' }, { status: 500 })
+      console.error('❌ Error saving reservation:', error)
+      return NextResponse.json({ error: 'Failed to save reservation' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error('❌ Unexpected error:', err)
-    return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
+    return NextResponse.json({ message: 'Reservation confirmed' })
+  } catch (error) {
+    console.error('❌ Stripe session error:', error)
+    return NextResponse.json({ error: 'Failed to confirm session' }, { status: 500 })
   }
 }
