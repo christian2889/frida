@@ -1,28 +1,33 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+// ✅ Inicializa Supabase usando claves desde Vercel
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_KEY!
+)
 
-})
+export async function POST(req: NextRequest) {
+  const body = await req.json()
+  const { name, email, quantity, eventId } = body
 
-export async function GET(req: NextRequest) {
-  const sessionId = req.nextUrl.searchParams.get('session_id')
-  if (!sessionId) {
-    return NextResponse.json({ error: 'Missing session_id' }, { status: 400 })
+  if (!name || !email || !quantity || !eventId) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+  const { error } = await supabase.from('reservations').insert([
+    {
+      name,
+      email,
+      quantity,
+      event_id: eventId,
+    },
+  ])
 
-    return NextResponse.json({
-      name: session.metadata?.name,
-      email: session.customer_email,
-      quantity: Number(session.metadata?.quantity),
-      eventId: session.metadata?.eventId,
-    })
-  } catch (error) {
-    console.error('Stripe error:', error)
-    return NextResponse.json({ error: 'Failed to retrieve session' }, { status: 500 })
+  if (error) {
+    console.error('❌ Supabase insert error:', error)
+    return NextResponse.json({ error: 'Failed to save reservation' }, { status: 500 })
   }
+
+  return NextResponse.json({ message: 'Reservation confirmed and saved' }, { status: 200 })
 }
