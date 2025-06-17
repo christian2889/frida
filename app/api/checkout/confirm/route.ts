@@ -1,41 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-import { supabaseAdmin } from '@/utils/supabase/admin'
+import { supabase } from '@/lib/supabase'
+import { NextResponse } from 'next/server'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-})
-
-export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { sessionId } = body
-
-  if (!sessionId) {
-    return NextResponse.json({ error: 'Missing session ID' }, { status: 400 })
-  }
-
+export async function POST(request: Request) {
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
-
-    const { name, email, eventId, quantity } = session.metadata || {}
-
-    const { error } = await supabaseAdmin.from('reservations').insert([
-      {
-        name,
-        email,
-        event_id: eventId,
-        quantity: parseInt(quantity || '1'),
-      },
-    ])
-
-    if (error) {
-      console.error('❌ Supabase insert error:', error)
-      return NextResponse.json({ error: 'Failed to save reservation' }, { status: 500 })
+    // Verifica que Supabase esté inicializado correctamente
+    if (!supabase) {
+      throw new Error('Supabase client not initialized')
     }
 
-    return NextResponse.json({ message: 'Reservation saved' })
-  } catch (error) {
-    console.error('❌ Stripe session retrieve error:', error)
-    return NextResponse.json({ error: 'Failed to retrieve session' }, { status: 500 })
+    // Tu lógica de negocio aquí...
+    // Ejemplo:
+    const { data, error } = await supabase
+      .from('tu_tabla')
+      .select('*')
+    
+    if (error) throw error
+
+    return NextResponse.json(data)
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    )
   }
 }
